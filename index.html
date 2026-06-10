@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Know Your Rights — A Civics Learning Game</title>
+<meta name="description" content="Learn your constitutional rights through interactive scenarios, quizzes, landmark cases, and games. Educational only — not legal advice." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================
+   THEME TOKENS  — unchanged from your original design.
+   ============================================================ */
+:root {
+  --bg:#F6F4EE; --surface:#FFFFFF; --ink:#1B2436; --muted:#5D6577;
+  --gold:#B5862F; --gold-soft:#F0E6CC; --navy:#1B2436; --line:#E4DFD2;
+  --good:#2F7D55; --good-soft:#E3F0E8; --bad:#B23B3B; --bad-soft:#F6E2E0;
+  --shadow:0 1px 2px rgba(27,36,54,.06), 0 8px 24px rgba(27,36,54,.07);
+}
+[data-theme="dark"] {
+  --bg:#12161F; --surface:#1B2230; --ink:#ECE7DA; --muted:#9AA1B1;
+  --gold:#D7AD55; --gold-soft:#2C2A22; --navy:#ECE7DA; --line:#2A3242;
+  --good:#5FBF8A; --good-soft:#1C2D25; --bad:#E07B7B; --bad-soft:#2E2122;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body { background:var(--bg); color:var(--ink); font-family:"Inter",system-ui,sans-serif; line-height:1.6; -webkit-font-smoothing:antialiased; transition:background .25s,color .25s; }
+.wrap { width:100%; max-width:760px; margin:0 auto; padding:0 22px; }
+
+/* ---------- header (unchanged) ---------- */
+header { position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--bg) 85%,transparent); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+.bar { display:flex; align-items:center; justify-content:space-between; padding:14px 0; gap:12px; }
+.brand { display:flex; align-items:center; gap:11px; }
+.seal { width:38px; height:38px; flex:none; border-radius:50%; background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--gold) 70%,white),var(--gold)); border:2px solid var(--gold); display:grid; place-items:center; color:var(--navy); font-family:"Fraunces",serif; font-weight:800; font-size:1.15rem; box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--bg) 60%,transparent); }
+.brand b { font-family:"Fraunces",serif; font-weight:600; font-size:1.12rem; letter-spacing:-.01em; }
+.brand small { display:block; font-size:.68rem; color:var(--muted); font-weight:500; letter-spacing:.04em; text-transform:uppercase; }
+.hud { display:flex; align-items:center; gap:14px; }
+.level-chip { display:flex; align-items:center; gap:8px; background:var(--gold-soft); color:var(--gold); padding:6px 12px; border-radius:100px; font-weight:700; font-size:.82rem; white-space:nowrap; }
+.theme-btn { width:38px; height:38px; border-radius:50%; border:1px solid var(--line); background:var(--surface); cursor:pointer; font-size:1.05rem; color:var(--ink); display:grid; place-items:center; transition:border-color .15s; }
+.theme-btn:hover { border-color:var(--gold); }
+
+/* ---------- tab navigation (new, same visual language) ---------- */
+.tabs { display:flex; gap:6px; overflow-x:auto; padding:12px 0 0; scrollbar-width:none; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab { flex:none; border:1px solid var(--line); background:var(--surface); color:var(--muted); border-radius:100px; padding:8px 16px; font:600 .88rem "Inter",sans-serif; cursor:pointer; white-space:nowrap; transition:all .15s; }
+.tab:hover { border-color:var(--gold); }
+.tab.active { background:var(--gold); border-color:var(--gold); color:#fff; }
+[data-theme="dark"] .tab.active { color:var(--navy); }
+
+.view { display:none; }
+.view.active { display:block; animation:fade .3s ease; }
+@keyframes fade { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+/* ---------- disclaimer (unchanged) ---------- */
+.disclaimer { background:var(--gold-soft); border:1px solid color-mix(in srgb,var(--gold) 35%,transparent); color:var(--ink); border-radius:12px; padding:12px 16px; margin:18px 0 8px; font-size:.84rem; }
+.disclaimer b { color:var(--gold); }
+
+/* ---------- dashboard (unchanged + stat grid) ---------- */
+.dash { background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:24px; margin:18px 0 26px; box-shadow:var(--shadow); }
+.dash h1 { font-family:"Fraunces",serif; font-weight:600; font-size:clamp(1.6rem,5vw,2.1rem); letter-spacing:-.02em; margin-bottom:6px; }
+.dash p.sub { color:var(--muted); margin-bottom:20px; }
+.xpbar { height:12px; background:var(--line); border-radius:100px; overflow:hidden; }
+.xpfill { height:100%; width:0%; background:linear-gradient(90deg,var(--gold),color-mix(in srgb,var(--gold) 60%,white)); border-radius:100px; transition:width .6s cubic-bezier(.4,0,.2,1); }
+.xptext { display:flex; justify-content:space-between; font-size:.78rem; color:var(--muted); margin-top:7px; }
+.statgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:20px; }
+.stat { background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:13px; text-align:center; }
+.stat b { font-family:"Fraunces",serif; font-size:1.4rem; display:block; color:var(--gold); }
+.stat span { font-size:.7rem; color:var(--muted); }
+.badges { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+.badge { display:flex; align-items:center; gap:7px; border:1px solid var(--line); border-radius:100px; padding:6px 13px; font-size:.8rem; font-weight:600; color:var(--muted); opacity:.5; transition:all .3s; }
+.badge.earned { color:var(--gold); border-color:var(--gold); opacity:1; background:var(--gold-soft); }
+.streak-btn { margin-top:18px; width:100%; border:1.5px dashed var(--gold); background:var(--gold-soft); color:var(--gold); border-radius:12px; padding:13px; font:600 .92rem "Inter",sans-serif; cursor:pointer; }
+.streak-btn:disabled { opacity:.6; cursor:default; }
+
+/* ---------- section headers (unchanged) ---------- */
+.eyebrow { font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin:28px 0 8px; }
+h2 { font-family:"Fraunces",serif; font-weight:600; font-size:1.5rem; letter-spacing:-.01em; margin-bottom:4px; }
+.section-sub { color:var(--muted); font-size:.92rem; margin-bottom:18px; }
+
+/* ---------- cards (unchanged) ---------- */
+.card { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:22px; margin-bottom:16px; box-shadow:var(--shadow); }
+.card.locked { opacity:.5; pointer-events:none; }
+.case-head { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.case-tag { font-size:.7rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--gold); background:var(--gold-soft); padding:4px 10px; border-radius:6px; }
+.case-done { margin-left:auto; color:var(--good); font-size:.8rem; font-weight:700; display:none; }
+.card.solved .case-done { display:inline; }
+.card h3 { font-family:"Fraunces",serif; font-weight:600; font-size:1.16rem; margin-bottom:8px; }
+.scene { color:var(--ink); margin-bottom:16px; }
+.opts { display:flex; flex-direction:column; gap:9px; }
+.opt { text-align:left; width:100%; border:1.5px solid var(--line); background:transparent; color:var(--ink); border-radius:11px; padding:13px 15px; cursor:pointer; font-family:inherit; font-size:.95rem; transition:border-color .15s,background .15s; }
+.opt:hover:not(:disabled) { border-color:var(--gold); }
+.opt:disabled { cursor:default; }
+.opt.correct { border-color:var(--good); background:var(--good-soft); }
+.opt.wrong { border-color:var(--bad); background:var(--bad-soft); }
+.feedback { margin-top:15px; border-radius:11px; padding:14px 16px; font-size:.9rem; display:none; }
+.feedback.show { display:block; }
+.feedback.right { background:var(--good-soft); border:1px solid color-mix(in srgb,var(--good) 35%,transparent); }
+.feedback.miss { background:var(--bad-soft); border:1px solid color-mix(in srgb,var(--bad) 35%,transparent); }
+.feedback .verdict { font-weight:700; margin-bottom:5px; display:flex; align-items:center; gap:7px; }
+.feedback.right .verdict { color:var(--good); }
+.feedback.miss .verdict { color:var(--bad); }
+.feedback .right-tag { display:inline-block; margin-top:8px; font-size:.76rem; font-weight:600; color:var(--gold); }
+
+/* ---------- learning path (new) ---------- */
+.path-head { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.path-pill { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; padding:5px 12px; border-radius:100px; }
+.lesson { display:flex; align-items:center; gap:13px; background:var(--surface); border:1px solid var(--line); border-radius:13px; padding:14px 16px; margin-bottom:9px; cursor:pointer; transition:border-color .15s; }
+.lesson:hover:not(.locked) { border-color:var(--gold); }
+.lesson.locked { opacity:.45; cursor:not-allowed; }
+.lesson.done { border-color:var(--good); }
+.lesson .num { width:30px; height:30px; flex:none; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:.85rem; background:var(--gold-soft); color:var(--gold); }
+.lesson.done .num { background:var(--good-soft); color:var(--good); }
+.lesson .lt { font-weight:600; font-size:.95rem; }
+.lesson .ls { font-size:.78rem; color:var(--muted); }
+.lesson .chev { margin-left:auto; color:var(--muted); }
+
+/* ---------- match game (new) ---------- */
+.match-wrap { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.match-col { display:flex; flex-direction:column; gap:9px; }
+.match-item { border:1.5px solid var(--line); background:var(--surface); border-radius:11px; padding:12px; font-size:.9rem; cursor:pointer; text-align:center; transition:all .15s; }
+.match-item:hover { border-color:var(--gold); }
+.match-item.selected { border-color:var(--gold); background:var(--gold-soft); }
+.match-item.matched { border-color:var(--good); background:var(--good-soft); color:var(--good); cursor:default; pointer-events:none; }
+.match-col small { font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:700; text-align:center; margin-bottom:2px; }
+
+/* ---------- modal (lessons & cases) ---------- */
+.modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; place-items:center; padding:20px; z-index:40; }
+.modal-bg.show { display:grid; }
+.modal { background:var(--surface); border:1px solid var(--line); border-radius:18px; max-width:560px; width:100%; max-height:86vh; overflow:auto; padding:26px; box-shadow:var(--shadow); }
+.modal h3 { font-family:"Fraunces",serif; font-weight:600; font-size:1.35rem; margin-bottom:6px; }
+.modal .principle { background:var(--gold-soft); border-left:3px solid var(--gold); border-radius:8px; padding:12px 14px; margin:14px 0; font-size:.9rem; }
+.modal .principle b { color:var(--gold); }
+.modal p { margin-bottom:12px; font-size:.94rem; }
+.modal .x { float:right; background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--muted); line-height:1; }
+
+/* ---------- toast (unchanged) ---------- */
+.toast { position:fixed; left:50%; bottom:26px; transform:translate(-50%,120%); background:var(--navy); color:var(--bg); padding:12px 20px; border-radius:100px; font-weight:600; font-size:.9rem; box-shadow:var(--shadow); z-index:50; transition:transform .35s cubic-bezier(.2,.8,.2,1); display:flex; align-items:center; gap:9px; }
+.toast.show { transform:translate(-50%,0); }
+
+footer { border-top:1px solid var(--line); margin-top:40px; padding:28px 0 48px; color:var(--muted); font-size:.82rem; }
+footer .reset { background:none; border:none; color:var(--gold); cursor:pointer; font:inherit; text-decoration:underline; padding:0; }
+
+@media (max-width:560px) { .statgrid { grid-template-columns:repeat(2,1fr); } }
+@media (prefers-reduced-motion:reduce) { * { transition:none !important; scroll-behavior:auto; animation:none !important; } }
+:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="bar">
+      <div class="brand">
+        <div class="seal">§</div>
+        <div><b>Know Your Rights</b><small>A Civics Learning Game</small></div>
+      </div>
+      <div class="hud">
+        <div class="level-chip"><span>★</span><span id="levelLabel">Level 1</span></div>
+        <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="disclaimer">
+    <b>Educational only.</b> This game teaches general U.S. constitutional concepts. It is <b>not legal advice</b>, and laws vary by state and over time. For a real situation, talk to a licensed attorney.
+  </div>
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dash">
+    <div class="dash">
+      <h1>Welcome, future legal expert.</h1>
+      <p class="sub">Follow the learning paths, take on scenarios, study real Supreme Court cases, and play games to build real knowledge of your rights.</p>
+      <div class="xpbar"><div class="xpfill" id="xpfill"></div></div>
+      <div class="xptext"><span id="xpNow">0 XP</span><span id="xpNext">50 XP to Level 2</span></div>
+      <div class="statgrid">
+        <div class="stat"><b id="st-lessons">0</b><span>Lessons</span></div>
+        <div class="stat"><b id="st-scen">0</b><span>Scenarios</span></div>
+        <div class="stat"><b id="st-acc">—</b><span>Accuracy</span></div>
+        <div class="stat"><b id="st-streak">0</b><span>Day streak</span></div>
+      </div>
+      <button class="streak-btn" id="streakBtn">🔥 Check in for today (+10 XP)</button>
+      <div class="badges" id="badges"></div>
+    </div>
+  </section>
+
+  <!-- LEARN (paths) -->
+  <section class="view" id="view-learn"></section>
+
+  <!-- SCENARIOS -->
+  <section class="view" id="view-scen">
+    <p class="eyebrow">Scenario Lab</p>
+    <h2>What would you do?</h2>
+    <p class="section-sub">Real-life situations with recurring characters. Choose your response and learn which rights are in play.</p>
+    <div id="scenarios"></div>
+  </section>
+
+  <!-- CASES -->
+  <section class="view" id="view-cases">
+    <p class="eyebrow">Landmark Cases</p>
+    <h2>The cases that shaped your rights</h2>
+    <p class="section-sub">Tap a case to read its story and key principle, then test yourself.</p>
+    <div id="cases"></div>
+  </section>
+
+  <!-- GAMES -->
+  <section class="view" id="view-games">
+    <p class="eyebrow">Fact or Myth</p>
+    <h2>True or false?</h2>
+    <p class="section-sub">Common beliefs about the law — some are real, some are myths.</p>
+    <div id="factmyth"></div>
+
+    <p class="eyebrow">Rights Match</p>
+    <h2>Match the amendment</h2>
+    <p class="section-sub">Tap an amendment, then tap the right it protects.</p>
+    <div class="card"><div class="match-wrap"><div class="match-col" id="matchL"></div><div class="match-col" id="matchR"></div></div></div>
+
+    <p class="eyebrow">Legal Trivia</p>
+    <h2>Test your knowledge</h2>
+    <p class="section-sub">Multiple-choice questions across everything you've learned.</p>
+    <div id="trivia"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Built as a learning project • Hosted free on GitHub Pages • <button class="reset" id="resetBtn">Reset progress</button></p>
+  </div>
+</footer>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   KNOW YOUR RIGHTS — content + logic
+   All legal content is general U.S. civics, kept to well-settled
+   principles. Educational only, not legal advice.
+   Add content by copying a block; everything re-renders.
+   ============================================================ */
+
+/* ---------------- LEARNING PATHS ---------------- */
+const PATHS = [
+  { name:"Beginner Path", color:"#2F7D55", soft:"var(--good-soft)", lessons:[
+    { t:"What Are Rights?", body:"Rights are protections you hold simply because you are a person, and in the U.S. many are guaranteed by the Constitution. Some rights limit what the GOVERNMENT can do to you (like free speech or protection from unreasonable searches). Others are responsibilities of citizenship. Rights are not unlimited, and they often involve balancing your freedom against others' safety.",
+      q:"Most constitutional rights mainly limit the power of...", opts:["Your neighbors","The government","Private companies"], a:1,
+      exp:"The Bill of Rights mainly restrains GOVERNMENT action. Private disputes are usually handled by other laws." },
+    { t:"Constitution Basics", body:"The U.S. Constitution (1787) is the country's highest law. It sets up the government, divides power, and lists protections. Anything that conflicts with it can be struck down by courts. It can be changed only through amendments, which are deliberately hard to pass.",
+      q:"If a law conflicts with the Constitution, a court can...", opts:["Ignore the Constitution","Strike the law down","Do nothing"], a:1,
+      exp:"Because the Constitution is the supreme law, courts can invalidate laws that conflict with it (see Marbury v. Madison)." },
+    { t:"The Bill of Rights", body:"The Bill of Rights is the first 10 amendments, added in 1791. They cover free speech and religion (1st), search and seizure (4th), the right to remain silent and due process (5th), the right to a lawyer and jury (6th), and more. They were added because many feared a strong central government.",
+      q:"The Bill of Rights is the first how many amendments?", opts:["Three","Ten","Twenty-seven"], a:1,
+      exp:"The first ten amendments form the Bill of Rights, ratified in 1791." },
+    { t:"Branches of Government", body:"Power is split three ways: the Legislative branch (Congress) writes laws, the Executive branch (the President) enforces them, and the Judicial branch (the courts) interprets them. Each branch can check the others — this is 'separation of powers' and 'checks and balances.'",
+      q:"Which branch interprets the laws?", opts:["Legislative","Executive","Judicial"], a:2,
+      exp:"Courts (the Judicial branch) interpret laws and decide what the Constitution means." },
+    { t:"Citizen Responsibilities", body:"Rights come with responsibilities: obeying the law, serving on juries when called, paying taxes, and (for many) registering for selective service. Voting and staying informed aren't legally required, but they're how citizens shape the government that protects their rights.",
+      q:"Which of these is a legal duty when called?", opts:["Jury service","Running for office","Joining a party"], a:0,
+      exp:"Jury service is a civic duty you can be legally summoned for. The others are choices, not duties." }
+  ]},
+  { name:"Intermediate Path", color:"#B5862F", soft:"var(--gold-soft)", lessons:[
+    { t:"Police Encounters", body:"In a voluntary encounter you can ask 'Am I free to go?' If yes, you may leave. If you're detained, police need reasonable suspicion; to arrest, they need probable cause. You can remain silent and decline searches. Some states require you to give your name during a lawful stop.",
+      q:"To briefly detain you, police generally need...", opts:["A hunch","Reasonable suspicion","Nothing at all"], a:1,
+      exp:"A brief stop requires reasonable suspicion (Terry v. Ohio). A full arrest requires the higher bar of probable cause." },
+    { t:"Rights at School", body:"Students keep constitutional rights at school, but in a limited form. Schools can restrict speech that substantially disrupts learning (Tinker), regulate school-sponsored expression (Hazelwood), and search students on reasonable suspicion — a lower bar than police face.",
+      q:"Schools may limit student speech mainly when it...", opts:["Is unpopular","Substantially disrupts school","Mentions politics"], a:1,
+      exp:"Under Tinker, the key test is substantial disruption — not merely whether the message is unpopular." },
+    { t:"Workplace Rights", body:"Federal law bars employment discrimination based on race, color, religion, sex, and national origin (Title VII), plus age and disability under other laws. Most U.S. workers are 'at-will' (either side can end the job), but you can't be fired for an illegal reason like discrimination or certain protected complaints.",
+      q:"Which is an ILLEGAL reason to fire someone?", opts:["Poor performance","Their religion","Company downsizing"], a:1,
+      exp:"Firing someone because of religion (or race, sex, etc.) violates Title VII. Performance and layoffs are generally lawful reasons." },
+    { t:"Housing Rights", body:"The Fair Housing Act bars discrimination in renting or selling based on protected traits. Landlords generally must give notice before entering (rules vary by state) and follow a legal process to evict — they can't change locks or shut off utilities to force you out ('self-help' eviction is usually illegal).",
+      q:"To remove a tenant, a landlord must usually...", opts:["Change the locks","Follow a legal eviction process","Shut off the water"], a:1,
+      exp:"Landlords must use the courts. Locking tenants out or cutting utilities ('self-help' eviction) is illegal in most states." },
+    { t:"Free Speech Limits", body:"The 1st Amendment is broad but not absolute. Unprotected categories include true threats, incitement to imminent lawless action, defamation, and obscenity. Importantly, 'hate speech' is not a separate unprotected category in the U.S. — offensive speech is generally protected unless it crosses into one of these lines.",
+      q:"Which is NOT protected by the 1st Amendment?", opts:["Offensive opinions","A true threat of violence","Criticizing the government"], a:1,
+      exp:"True threats fall outside 1st Amendment protection. Offensive opinions and criticism of government are protected." },
+    { t:"Privacy Rights", body:"The 4th Amendment protects against unreasonable searches. Police generally need a warrant to search your home or your phone (Riley v. California), though exceptions exist (consent, emergencies, plain view). You can lower your protection by consenting — which is why you can decline.",
+      q:"Police generally need a warrant to search your...", opts:["Trash on the curb","Phone's contents","Words in public"], a:1,
+      exp:"Riley v. California requires a warrant to search a phone's contents, even during arrest." }
+  ]},
+  { name:"Advanced Path", color:"#7A4FB5", soft:"#ECE3F7", lessons:[
+    { t:"Judicial Review", body:"Judicial review is the power of courts to strike down laws that violate the Constitution. It isn't spelled out in the text — the Supreme Court claimed it in Marbury v. Madison (1803). It makes the courts a real check on Congress and the President.",
+      q:"Judicial review was established in...", opts:["Marbury v. Madison","Miranda v. Arizona","Brown v. Board"], a:0,
+      exp:"Marbury v. Madison (1803) established that courts can declare laws unconstitutional." },
+    { t:"Due Process", body:"Due process (5th and 14th Amendments) means the government must follow fair procedures before taking your life, liberty, or property. 'Procedural' due process is about fair steps (notice, a hearing). 'Substantive' due process protects certain fundamental rights from government interference.",
+      q:"Procedural due process is mainly about...", opts:["Fair procedures","Lower taxes","Faster trials only"], a:0,
+      exp:"Procedural due process guarantees fair procedures, such as notice and an opportunity to be heard." },
+    { t:"Search Warrants", body:"A valid warrant requires a neutral judge, probable cause, and a description of the place to be searched and items to be seized. Police generally can't go beyond what the warrant lists. Evidence from an illegal search may be excluded from trial (Mapp v. Ohio).",
+      q:"A warrant must be based on...", opts:["A police hunch","Probable cause","Public opinion"], a:1,
+      exp:"Warrants require probable cause, reviewed by a neutral judge, and must describe what's being searched." },
+    { t:"The Exclusionary Rule", body:"If police obtain evidence by violating your 4th Amendment rights, that evidence usually can't be used against you in court. This 'exclusionary rule' was applied to the states in Mapp v. Ohio (1961). Its goal is to discourage unlawful searches.",
+      q:"The exclusionary rule means illegally-obtained evidence is...", opts:["Always allowed","Usually excluded at trial","Given to the jury"], a:1,
+      exp:"Evidence from an unconstitutional search is generally excluded — the core of Mapp v. Ohio." },
+    { t:"Criminal Procedure", body:"A criminal case moves through stages: arrest, charges, an initial appearance, possible bail, pre-trial motions, trial, and (if convicted) sentencing and appeal. Throughout, you have rights: to counsel (6th), to remain silent (5th), to a speedy and public jury trial (6th), and against excessive bail (8th).",
+      q:"The right to a speedy, public jury trial comes from the...", opts:["1st Amendment","6th Amendment","10th Amendment"], a:1,
+      exp:"The 6th Amendment guarantees a speedy, public trial by jury and the right to counsel." }
+  ]}
+];
+
+/* ---------------- SCENARIOS (recurring characters) ---------------- */
+const SCENARIOS = [
+  { tag:"Police · Officer Reed", right:"4th Amendment", title:"The roadside search",
+    scene:"Officer Reed pulls you over for a broken taillight and asks: \u201CMind if I look in your car?\u201D You have nothing illegal but aren't sure you want a search.",
+    options:["\u201CSure, go ahead.\u201D","\u201CI don't consent to a search, officer.\u201D","Block the door and refuse to move."], correct:1,
+    right_msg:"The 4th Amendment protects against unreasonable searches. You can decline to consent, and that's not an admission of guilt. Without consent, a warrant, or probable cause, a search may be unlawful. Never physically resist — challenge it later in court.",
+    wrong_msg:"You're never required to consent, and refusing isn't suspicious by itself. But physically resisting can get you arrested. The protected move: clearly decline and stay calm." },
+  { tag:"In Custody · Officer Reed", right:"5th & 6th Amendments", title:"The midnight questions",
+    scene:"You've been detained at the station. Officer Reed says, \u201CWalk me through exactly where you were last night.\u201D You feel pressure to seem helpful.",
+    options:["Explain everything to prove your innocence.","Invent a simpler story.","\u201CI'm going to remain silent, and I'd like a lawyer.\u201D"], correct:2,
+    right_msg:"The 5th Amendment protects you from self-incrimination; the 6th gives you a right to a lawyer. You must invoke them clearly. Even innocent statements can be misread, so this is the safe move.",
+    wrong_msg:"Talking freely can hand prosecutors material even when you're innocent, and lying to investigators can be a crime. Clearly invoke silence and ask for a lawyer." },
+  { tag:"School · Student Alex", right:"1st Amendment", title:"The silent protest",
+    scene:"Student Alex wears a plain armband to quietly protest a war — no words, no disruption. The principal says, \u201CTake it off; you don't get free speech here.\u201D",
+    options:["The principal is right — schools can ban anything.","Students keep speech rights, but schools may limit speech that substantially disrupts.","Students have unlimited speech on campus."], correct:1,
+    right_msg:"Tinker v. Des Moines (1969): students don't shed their rights at the schoolhouse gate, but schools can restrict speech that substantially disrupts. A silent armband is generally protected.",
+    wrong_msg:"It's the middle ground — not a free-for-all, not a rights-free zone. Genuine disruption can be limited; a peaceful silent symbol usually can't." },
+  { tag:"Digital · Officer Reed", right:"4th Amendment", title:"The locked phone",
+    scene:"You're arrested and Officer Reed picks up your phone: \u201CI'll just look through this.\u201D No warrant.",
+    options:["That's fine — arrest means anything goes.","Police generally need a warrant to search a phone's contents.","Only if the phone is unlocked."], correct:1,
+    right_msg:"Riley v. California (2014): police generally need a warrant to search your phone's data, even during arrest, because a phone holds an enormous window into your private life.",
+    wrong_msg:"The lock screen isn't the deciding factor. Riley requires a warrant to search a phone's contents during arrest, period." },
+  { tag:"Police · Officer Reed", right:"5th Amendment / 4th", title:"Am I free to go?",
+    scene:"Officer Reed stops you on the sidewalk and starts asking where you're headed. You're not sure if you're being detained.",
+    options:["Answer everything and stay put.","Ask, \u201CAm I being detained, or am I free to go?\u201D","Walk away fast without a word."], correct:1,
+    right_msg:"Asking whether you're free to go clarifies the encounter. If it's voluntary, you may leave; if you're detained, police need reasonable suspicion. Either way you can stay calm and decline to answer questions.",
+    wrong_msg:"You don't have to answer questions, but suddenly bolting can escalate things or create suspicion. The clear, protected move is to ask if you're free to go." },
+  { tag:"Workplace · Employer Davis", right:"Title VII", title:"The promotion that vanished",
+    scene:"You're the top performer, but Employer Davis gives the promotion to someone less qualified and says, \u201CHonestly, a man fits this role better.\u201D",
+    options:["Nothing can be done; bosses choose freely.","This may be illegal sex discrimination under Title VII.","You must quit immediately to have a case."], correct:1,
+    right_msg:"Title VII of the Civil Rights Act bars employment decisions based on sex (and race, religion, national origin). A comment like that is strong evidence of discrimination. You can file a charge with the EEOC.",
+    wrong_msg:"Employers have wide discretion, but NOT to discriminate on protected traits. You don't have to quit to have a claim — and quitting can actually weaken some claims." },
+  { tag:"Housing · Tenant Sarah", right:"Tenant law", title:"The lockout",
+    scene:"Tenant Sarah is behind on rent. She comes home to find the landlord changed the locks and piled her things outside.",
+    options:["That's allowed — no rent, no home.","'Self-help' eviction like this is illegal in most states.","She can only complain after 30 days."], correct:1,
+    right_msg:"Even when rent is owed, landlords must use the legal eviction process through the courts. Changing locks, removing belongings, or cutting utilities ('self-help' eviction) is illegal in most states, and the tenant may be able to sue.",
+    wrong_msg:"Owing rent doesn't suspend a tenant's rights. Landlords can't bypass the courts with lockouts — that's an illegal self-help eviction in most states." },
+  { tag:"Housing · Tenant Sarah", right:"Tenant law", title:"The surprise visit",
+    scene:"Tenant Sarah's landlord lets himself in while she's at work, no notice, just to 'check on things.'",
+    options:["Landlords own it, so they can enter anytime.","Landlords usually must give notice before entering (rules vary by state).","Only police can enter without notice."], correct:1,
+    right_msg:"Tenants have a right to 'quiet enjoyment.' Most states require landlords to give reasonable notice (often 24-48 hours) before entering, except in emergencies. Exact rules vary by state and lease.",
+    wrong_msg:"Owning the property doesn't mean entering at will. Most states require advance notice except for genuine emergencies." },
+  { tag:"Consumer · Attorney Martinez", right:"Consumer law", title:"The 'final sale' lemon",
+    scene:"You buy a used laptop that dies in two days. The seller says, \u201CAll sales final, nothing I can do.\u201D Attorney Martinez raises an eyebrow.",
+    options:["'Final sale' always means zero rights.","Implied warranties and fraud protections may still apply.","You can only complain on social media."], correct:1,
+    right_msg:"Even on 'final sale' items, consumer protections can apply — implied warranties of merchantability, and laws against deceptive or fraudulent sales. Rights vary by state, but 'final sale' doesn't automatically erase them.",
+    wrong_msg:"'Final sale' limits returns but doesn't necessarily waive all protections, especially against fraud or a product that isn't as described. Consumer law varies by state." },
+  { tag:"Juvenile · Student Alex", right:"Juvenile rights", title:"Questioned without a parent",
+    scene:"Alex, age 15, is pulled into the principal's office where a police officer questions Alex about a theft — no parent, no lawyer present.",
+    options:["Minors have no right to silence.","Minors generally keep the right to remain silent and to counsel.","Only adults can ask for a lawyer."], correct:1,
+    right_msg:"Juveniles generally have the same core rights to remain silent and to an attorney. Courts also consider a minor's age when judging whether questioning was coercive (J.D.B. v. North Carolina). Many states add extra protections for minors.",
+    wrong_msg:"Being a minor doesn't remove the right to silence or to a lawyer. Courts actually give extra weight to a young person's age during questioning." },
+  { tag:"Free Speech · Attorney Martinez", right:"1st Amendment", title:"The angry online post",
+    scene:"Someone posts a harshly worded but non-threatening political rant about a local official. The city wants them arrested for it.",
+    options:["Harsh criticism of officials can be banned.","Criticizing government is core protected speech.","Only polite speech is protected."], correct:1,
+    right_msg:"Criticizing the government and public officials is at the very heart of the 1st Amendment. Speech doesn't lose protection for being rude or harsh — only if it crosses into a true threat, incitement, or defamation.",
+    wrong_msg:"Offensive or harsh political criticism is protected. The 1st Amendment isn't limited to polite speech — that's exactly the speech it was designed to protect." },
+  { tag:"Religion · Judge Carter", right:"1st Amendment", title:"The holiday display",
+    scene:"A public school wants to require all students to recite a specific religious prayer each morning. A parent objects to Judge Carter.",
+    options:["Public schools can mandate prayer.","Government-led mandatory prayer in public school is unconstitutional.","Only private schools have any rules."], correct:1,
+    right_msg:"The Establishment Clause bars the government from imposing religion. School-sponsored, mandatory prayer in public schools has been held unconstitutional (Engel v. Vitale, 1962). Students may pray on their own; the school just can't compel it.",
+    wrong_msg:"The government can't establish or mandate religion. Public schools can't require students to recite an official prayer, though students remain free to pray privately." },
+  { tag:"Police · Officer Reed", right:"4th Amendment", title:"The recording",
+    scene:"You film Officer Reed making an arrest in a public park. He says, \u201CStop recording or I'll arrest you.\u201D",
+    options:["Recording police is always illegal.","You generally have a right to record police in public.","Only news reporters may record."], correct:1,
+    right_msg:"Courts have widely recognized a right to record police performing their duties in public, as part of the 1st Amendment. Reasonable limits apply — you can't physically interfere — but recording itself is generally protected.",
+    wrong_msg:"There's a broad right to film police in public. You can't interfere with their work, but the act of recording is generally protected, and not just for journalists." },
+  { tag:"Due Process · Judge Carter", right:"5th & 14th Amendments", title:"No notice, no hearing",
+    scene:"The government tries to take someone's property and benefits without telling them or giving any chance to respond. They appear before Judge Carter.",
+    options:["Government can act first, explain never.","Due process generally requires notice and a chance to be heard.","Hearings are optional for the government."], correct:1,
+    right_msg:"Procedural due process (5th and 14th Amendments) generally requires the government to give notice and a meaningful opportunity to be heard before depriving you of life, liberty, or property.",
+    wrong_msg:"The government can't simply act with no process. Due process generally guarantees notice and a chance to respond before it takes your liberty or property." },
+  { tag:"Voting · Attorney Martinez", right:"Voting rights", title:"The intimidation at the polls",
+    scene:"At a polling place, a group blocks the entrance and tries to scare certain voters away. A voter calls Attorney Martinez.",
+    options:["That's just political activity.","Voter intimidation is illegal under federal law.","Nothing protects voters at the polls."], correct:1,
+    right_msg:"Intimidating, threatening, or coercing voters is illegal under federal law (including the Voting Rights Act and related statutes). Voters have a protected right to cast a ballot free from intimidation.",
+    wrong_msg:"Blocking or scaring voters isn't ordinary politics — it's voter intimidation, which is illegal under federal law." },
+  { tag:"Search · Officer Reed", right:"4th Amendment", title:"The warrant's limits",
+    scene:"Police have a warrant to search a garage for a stolen car. Officer Reed starts opening small jewelry boxes inside the house.",
+    options:["A warrant lets police search anywhere for anything.","A search must stay within what the warrant describes.","Warrants never limit police."], correct:1,
+    right_msg:"A warrant must describe the place and items to be searched, and police generally must stay within that scope. You can't hide a car in a jewelry box — so searching those likely exceeds the warrant.",
+    wrong_msg:"Warrants are specific. Police generally can't search places too small to hold the listed item — opening jewelry boxes while looking for a car exceeds the warrant's scope." }
+];
+
+/* ---------------- SUPREME COURT CASES ---------------- */
+const CASES = [
+  { name:"Marbury v. Madison (1803)", tag:"Judicial Review",
+    story:"In the new republic's first big constitutional showdown, the Court faced a dispute over an undelivered government commission. Rather than simply rule on the appointment, Chief Justice John Marshall used the case to answer a deeper question: who decides when a law conflicts with the Constitution?",
+    principle:"Established judicial review — the power of courts to strike down laws that violate the Constitution.",
+    q:"Marbury v. Madison gave courts the power to...", opts:["Write new laws","Strike down unconstitutional laws","Elect the President"], a:1 },
+  { name:"Brown v. Board of Education (1954)", tag:"Equal Protection",
+    story:"Black children were forced into separate, underfunded public schools under the doctrine of 'separate but equal.' Families challenged it, arguing that segregation itself caused harm. A unanimous Court agreed.",
+    principle:"Racially segregated public schools violate the 14th Amendment's Equal Protection Clause; 'separate but equal' has no place in public education.",
+    q:"Brown v. Board overturned the doctrine of...", opts:["Judicial review","'Separate but equal'","Due process"], a:1 },
+  { name:"Mapp v. Ohio (1961)", tag:"4th Amendment",
+    story:"Police searched Dollree Mapp's home without a valid warrant and found material they used to convict her. She challenged the search, and the Court used her case to decide what happens to illegally seized evidence.",
+    principle:"The exclusionary rule applies to the states: evidence obtained through an unconstitutional search generally can't be used in court.",
+    q:"Mapp v. Ohio is famous for the...", opts:["Right to a lawyer","Exclusionary rule","Miranda warning"], a:1 },
+  { name:"Gideon v. Wainwright (1963)", tag:"6th Amendment",
+    story:"Clarence Gideon was charged with a crime, couldn't afford a lawyer, and was denied one. He was convicted, then handwrote his own appeal to the Supreme Court from prison — and won.",
+    principle:"People who can't afford a lawyer in a criminal case have the right to have one appointed for them.",
+    q:"Gideon v. Wainwright guarantees a defendant the right to...", opts:["A free lawyer if they can't afford one","A speedy trial only","Skip the trial"], a:0 },
+  { name:"Miranda v. Arizona (1966)", tag:"5th Amendment",
+    story:"Ernesto Miranda confessed during police questioning without being told he could stay silent or have a lawyer. The Court set rules to make sure suspects know their rights before custodial questioning.",
+    principle:"Before custodial interrogation, police must inform suspects of their rights to silence and to an attorney — the 'Miranda warning.'",
+    q:"Miranda warnings must be given before...", opts:["Any traffic ticket","Custodial interrogation","Every arrest, always"], a:1 },
+  { name:"Tinker v. Des Moines (1969)", tag:"1st Amendment",
+    story:"Students wore black armbands to school to protest the Vietnam War. They were suspended. The Court had to decide whether students keep free-speech rights inside public schools.",
+    principle:"Students don't shed their constitutional rights at the schoolhouse gate, though schools may restrict speech that substantially disrupts.",
+    q:"Tinker protects student speech unless it...", opts:["Is unpopular","Substantially disrupts school","Mentions war"], a:1 },
+  { name:"New York Times v. United States (1971)", tag:"1st Amendment",
+    story:"The government tried to stop newspapers from publishing the 'Pentagon Papers,' a secret history of the Vietnam War. The Court weighed national security against freedom of the press.",
+    principle:"The government bears a heavy burden to justify 'prior restraint,' and failed to meet it here — strongly protecting freedom of the press.",
+    q:"The case set a high bar against...", opts:["Prior restraint of the press","Jury trials","Search warrants"], a:0 },
+  { name:"Riley v. California (2014)", tag:"4th Amendment",
+    story:"Police searched the data on an arrested man's smartphone without a warrant. The Court considered whether a modern phone is just another item in your pocket — or something far more private.",
+    principle:"Police generally need a warrant to search the digital contents of a cell phone, even during an arrest.",
+    q:"Riley v. California requires a warrant to search your...", opts:["Car trunk","Phone's contents","Mailbox"], a:1 }
+];
+
+/* ---------------- FACT OR MYTH ---------------- */
+const FACTMYTH = [
+  { s:"Police always need a warrant to search.", fact:false, exp:"Myth. There are many exceptions: your consent, plain view, emergencies, a search during a lawful arrest, and the automobile exception, among others." },
+  { s:"Students have no free speech rights at school.", fact:false, exp:"Myth. Tinker says students keep speech rights — though schools can limit speech that substantially disrupts." },
+  { s:"Landlords can enter your apartment whenever they want.", fact:false, exp:"Myth. Most states require advance notice except in emergencies. Tenants have a right to 'quiet enjoyment.'" },
+  { s:"You generally don't have to answer police questions.", fact:true, exp:"Fact. You can invoke your right to remain silent. Some states require you to give your name during a lawful stop, but you needn't answer further questions." },
+  { s:"Police must read Miranda rights every time they arrest someone.", fact:false, exp:"Myth. Miranda is required before custodial INTERROGATION. Skipping it may make statements inadmissible — it doesn't void the arrest." },
+  { s:"You generally have the right to record police in public.", fact:true, exp:"Fact. Courts widely recognize a right to film police doing their jobs in public, as long as you don't physically interfere." },
+  { s:"A search warrant lets police search your whole house for anything.", fact:false, exp:"Myth. A warrant must describe the place and items, and the search must stay within that scope." },
+  { s:"Hate speech is a separate category that's banned in the U.S.", fact:false, exp:"Myth. The U.S. has no general 'hate speech' exception. Offensive speech is usually protected unless it's a true threat, incitement, or defamation." },
+  { s:"If you're innocent, you never need a lawyer.", fact:false, exp:"Myth. Innocent people can still say things that get misused. The right to counsel exists precisely to protect everyone." },
+  { s:"The government must give notice and a hearing before taking your property.", fact:true, exp:"Fact. That's procedural due process under the 5th and 14th Amendments." }
+];
+
+/* ---------------- RIGHTS MATCH ---------------- */
+const MATCH = [
+  { amend:"1st Amendment", right:"Speech, religion & press" },
+  { amend:"2nd Amendment", right:"Right to bear arms" },
+  { amend:"4th Amendment", right:"No unreasonable searches" },
+  { amend:"5th Amendment", right:"Silence & due process" },
+  { amend:"6th Amendment", right:"Lawyer & jury trial" },
+  { amend:"8th Amendment", right:"No cruel & unusual punishment" }
+];
+
+/* ---------------- LEGAL TRIVIA ---------------- */
+const TRIVIA = [
+  { q:"Which amendment protects the right to remain silent?", opts:["1st","5th","8th"], a:1, exp:"The 5th Amendment protects against self-incrimination." },
+  { q:"Which amendment covers searches and seizures?", opts:["4th","6th","10th"], a:0, exp:"The 4th Amendment guards against unreasonable searches and seizures." },
+  { q:"Who can declare a law unconstitutional?", opts:["The President","The courts","The Senate alone"], a:1, exp:"Courts exercise judicial review (Marbury v. Madison)." },
+  { q:"The right to a lawyer if you can't afford one comes from which case?", opts:["Gideon v. Wainwright","Roe v. Wade","Mapp v. Ohio"], a:0, exp:"Gideon v. Wainwright (1963)." },
+  { q:"To briefly detain someone, police need...", opts:["Probable cause","Reasonable suspicion","A warrant"], a:1, exp:"A brief stop needs reasonable suspicion; arrest needs probable cause." },
+  { q:"Title VII bans job discrimination based on all EXCEPT...", opts:["Race","Religion","Job performance"], a:2, exp:"Performance is a lawful basis; race and religion are protected traits." },
+  { q:"Which is NOT protected by the 1st Amendment?", opts:["A true threat","An unpopular opinion","Criticizing the mayor"], a:0, exp:"True threats fall outside 1st Amendment protection." },
+  { q:"How many amendments are in the Bill of Rights?", opts:["5","10","27"], a:1, exp:"The first ten amendments." },
+  { q:"The exclusionary rule means illegally-seized evidence is...", opts:["Always used","Usually excluded","Given to the press"], a:1, exp:"It's generally excluded from trial (Mapp v. Ohio)." },
+  { q:"Miranda warnings are required before...", opts:["Custodial interrogation","Writing a ticket","Every arrest"], a:0, exp:"Before custodial interrogation." },
+  { q:"Which branch writes the laws?", opts:["Executive","Legislative","Judicial"], a:1, exp:"Congress, the Legislative branch." },
+  { q:"A landlord wanting to evict a tenant must usually...", opts:["Change the locks","Use the courts","Cut utilities"], a:1, exp:"Legal eviction goes through the courts; self-help eviction is usually illegal." },
+  { q:"Brown v. Board of Education struck down...", opts:["Judicial review","School segregation","Search warrants"], a:1, exp:"It ended 'separate but equal' in public schools." },
+  { q:"Police generally need a warrant to search your...", opts:["Phone's contents","Words in public","Curbside trash"], a:0, exp:"Riley v. California requires a warrant for phone data." },
+  { q:"Voter intimidation at the polls is...", opts:["Legal","Illegal under federal law","Only a state matter"], a:1, exp:"Federal law prohibits intimidating voters." }
+];
+
+/* ---------------- BADGES ---------------- */
+const BADGES = [
+  { id:"first",  ic:"\uD83D\uDD0D", label:"First Case",       check:s=>s.solvedScen.size>=1 },
+  { id:"path1",  ic:"\uD83C\uDF31", label:"Beginner Graduate", check:s=>pathDone(0,s) },
+  { id:"path2",  ic:"\uD83D\uDCDA", label:"Rights Defender",   check:s=>pathDone(1,s) },
+  { id:"scholar",ic:"\uD83C\uDF93", label:"Supreme Scholar",   check:s=>s.solvedCase.size>=CASES.length },
+  { id:"scen",   ic:"\u2696\uFE0F", label:"Scenario Master",   check:s=>s.solvedScen.size>=SCENARIOS.length },
+  { id:"myth",   ic:"\uD83E\uDDE0", label:"Myth Buster",       check:s=>s.fmCorrect>=FACTMYTH.length },
+  { id:"match",  ic:"\uD83D\uDD17", label:"Perfect Match",     check:s=>s.matched>=MATCH.length },
+  { id:"trivia", ic:"\uD83C\uDFAF", label:"Trivia Ace",        check:s=>s.trivCorrect>=10 },
+  { id:"streak", ic:"\uD83D\uDD25", label:"On a Streak",       check:s=>s.streak>=3 },
+  { id:"lvl5",   ic:"\u2B50", label:"Civic Champion",    check:s=>level(s.xp)>=5 }
+];
+
+/* ============================================================
+   STATE  (in memory — see note at file end to persist it)
+   ============================================================ */
+const state = {
+  xp:0, streak:0, lastCheckin:null,
+  solvedScen:new Set(), solvedCase:new Set(), doneLessons:new Set(),
+  fmCorrect:0, fmDone:new Set(), matched:0,
+  trivCorrect:0, trivDone:new Set(),
+  totalAnswers:0, rightAnswers:0, earned:new Set()
+};
+const XP_PER_LEVEL = 50;
+const level = xp => Math.floor(xp/XP_PER_LEVEL)+1;
+const pathDone = (i,s)=>PATHS[i].lessons.every((_,j)=>s.doneLessons.has(i+"-"+j));
+const $ = sel => document.querySelector(sel);
+
+/* ---------------- TABS ---------------- */
+const TABS = [["dash","Dashboard"],["learn","Learn"],["scen","Scenarios"],["cases","Cases"],["games","Games"]];
+function renderTabs(){
+  const root=$("#tabs"); root.innerHTML="";
+  TABS.forEach(([id,label],i)=>{
+    const b=document.createElement("button");
+    b.className="tab"+(i===0?" active":""); b.textContent=label;
+    b.onclick=()=>{
+      document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+      document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+      b.classList.add("active"); $("#view-"+id).classList.add("active");
+      window.scrollTo({top:0,behavior:"smooth"});
+    };
+    root.appendChild(b);
+  });
+}
+
+/* ---------------- LEARNING PATHS ---------------- */
+function renderPaths(){
+  const root=$("#view-learn"); root.innerHTML="";
+  PATHS.forEach((p,pi)=>{
+    const unlocked = pi===0 || pathDone(pi-1,state);
+    const head=document.createElement("div");
+    head.innerHTML=`<p class="eyebrow">Learning Path ${pi+1}</p>
+      <div class="path-head"><h2>${p.name}</h2>
+      <span class="path-pill" style="background:${p.soft};color:${p.color}">${unlocked?"Unlocked":"Locked"}</span></div>
+      <p class="section-sub">${unlocked?"Complete each lesson to unlock the next path.":"Finish the previous path to unlock this one."}</p>`;
+    root.appendChild(head);
+    p.lessons.forEach((ls,li)=>{
+      const key=pi+"-"+li;
+      const prevDone = li===0 || state.doneLessons.has(pi+"-"+(li-1));
+      const open = unlocked && prevDone;
+      const done = state.doneLessons.has(key);
+      const el=document.createElement("div");
+      el.className="lesson"+(done?" done":"")+(open?"":" locked");
+      el.innerHTML=`<div class="num">${done?"\u2713":li+1}</div>
+        <div><div class="lt">${ls.t}</div><div class="ls">${done?"Completed":(open?"Tap to begin":"Locked")}</div></div>
+        <div class="chev">${open?"\u203A":"\uD83D\uDD12"}</div>`;
+      if(open) el.onclick=()=>openLesson(pi,li);
+      root.appendChild(el);
+    });
+  });
+}
+
+function openLesson(pi,li){
+  const ls=PATHS[pi].lessons[li];
+  const m=$("#modal");
+  m.innerHTML=`<button class="x" onclick="closeModal()">\u00D7</button>
+    <h3>${ls.t}</h3><p>${ls.body}</p>
+    <p style="font-weight:600;margin-top:6px">${ls.q}</p>
+    <div class="opts" id="lqo"></div><div class="feedback" id="lfb"></div>`;
+  const opts=m.querySelector("#lqo"), fb=m.querySelector("#lfb");
+  ls.opts.forEach((t,oi)=>{
+    const b=document.createElement("button"); b.className="opt"; b.textContent=t;
+    b.onclick=()=>{
+      [...opts.children].forEach((x,xi)=>{x.disabled=true; if(xi===ls.a)x.classList.add("correct"); else if(xi===oi)x.classList.add("wrong");});
+      const right=oi===ls.a;
+      fb.className="feedback show "+(right?"right":"miss");
+      fb.innerHTML=`<div class="verdict">${right?"\u2713 Correct":"\u2717 Not quite"}</div><div>${ls.exp}</div>`;
+      tally(right);
+      const key=pi+"-"+li;
+      if(!state.doneLessons.has(key)){ state.doneLessons.add(key); addXP(right?15:8, right?"+15 XP — lesson complete!":"+8 XP — lesson complete"); renderPaths(); updateDash(); }
+    };
+    opts.appendChild(b);
+  });
+  $("#modalBg").classList.add("show");
+}
+function closeModal(){ $("#modalBg").classList.remove("show"); }
+$("#modalBg").onclick=e=>{ if(e.target.id==="modalBg") closeModal(); };
+
+/* ---------------- SCENARIOS ---------------- */
+function renderScenarios(){
+  const root=$("#scenarios"); root.innerHTML="";
+  SCENARIOS.forEach((sc,i)=>{
+    const card=document.createElement("div"); card.className="card";
+    card.innerHTML=`<div class="case-head"><span class="case-tag">${sc.tag}</span><span class="case-done">\u2713 Solved</span></div>
+      <h3>${sc.title}</h3><p class="scene">${sc.scene}</p><div class="opts"></div><div class="feedback"></div>`;
+    const opts=card.querySelector(".opts"), fb=card.querySelector(".feedback");
+    sc.options.forEach((t,oi)=>{
+      const b=document.createElement("button"); b.className="opt"; b.textContent=t;
+      b.onclick=()=>{
+        if(state.solvedScen.has(i)) return;
+        const right=oi===sc.correct;
+        [...opts.children].forEach((x,xi)=>{x.disabled=true; if(xi===sc.correct)x.classList.add("correct"); else if(xi===oi)x.classList.add("wrong");});
+        fb.className="feedback show "+(right?"right":"miss");
+        fb.innerHTML=`<div class="verdict">${right?"\u2713 Right call":"\u2717 Not quite"}</div><div>${right?sc.right_msg:sc.wrong_msg}</div><span class="right-tag">Right involved: ${sc.right}</span>`;
+        state.solvedScen.add(i); card.classList.add("solved"); tally(right);
+        addXP(right?15:5, right?"+15 XP — nailed it!":"+5 XP — learned something!"); updateDash();
+      };
+      opts.appendChild(b);
+    });
+    root.appendChild(card);
+  });
+}
+
+/* ---------------- CASES ---------------- */
+function renderCases(){
+  const root=$("#cases"); root.innerHTML="";
+  CASES.forEach((c,i)=>{
+    const card=document.createElement("div"); card.className="card"; card.style.cursor="pointer";
+    card.innerHTML=`<div class="case-head"><span class="case-tag">${c.tag}</span><span class="case-done">\u2713 Studied</span></div>
+      <h3>${c.name}</h3><p class="scene" style="margin:0">${c.principle}</p>`;
+    if(state.solvedCase.has(i)) card.classList.add("solved");
+    card.onclick=()=>openCase(i);
+    root.appendChild(card);
+  });
+}
+function openCase(i){
+  const c=CASES[i], m=$("#modal");
+  m.innerHTML=`<button class="x" onclick="closeModal()">\u00D7</button>
+    <h3>${c.name}</h3><p>${c.story}</p>
+    <div class="principle"><b>Key principle:</b> ${c.principle}</div>
+    <p style="font-weight:600">${c.q}</p><div class="opts" id="cqo"></div><div class="feedback" id="cfb"></div>`;
+  const opts=m.querySelector("#cqo"), fb=m.querySelector("#cfb");
+  c.opts.forEach((t,oi)=>{
+    const b=document.createElement("button"); b.className="opt"; b.textContent=t;
+    b.onclick=()=>{
+      [...opts.children].forEach((x,xi)=>{x.disabled=true; if(xi===c.a)x.classList.add("correct"); else if(xi===oi)x.classList.add("wrong");});
+      const right=oi===c.a;
+      fb.className="feedback show "+(right?"right":"miss");
+      fb.innerHTML=`<div class="verdict">${right?"\u2713 Correct":"\u2717 Review the principle above"}</div>`;
+      tally(right);
+      if(!state.solvedCase.has(i)){ state.solvedCase.add(i); addXP(right?12:6,right?"+12 XP":"+6 XP"); renderCases(); updateDash(); }
+    };
+    opts.appendChild(b);
+  });
+  $("#modalBg").classList.add("show");
+}
+
+/* ---------------- FACT OR MYTH ---------------- */
+function renderFactMyth(){
+  const root=$("#factmyth"); root.innerHTML="";
+  FACTMYTH.forEach((f,i)=>{
+    const card=document.createElement("div"); card.className="card";
+    card.innerHTML=`<p class="scene">\u201C${f.s}\u201D</p>
+      <div class="opts" style="flex-direction:row;gap:10px"><button class="opt" style="flex:1;text-align:center">Fact</button><button class="opt" style="flex:1;text-align:center">Myth</button></div>
+      <div class="feedback"></div>`;
+    const [factB,mythB]=card.querySelectorAll(".opt"), fb=card.querySelector(".feedback");
+    const choose=(saidFact)=>{
+      if(state.fmDone.has(i)) return;
+      factB.disabled=mythB.disabled=true;
+      const correctBtn = f.fact?factB:mythB;
+      const chosen = saidFact?factB:mythB;
+      correctBtn.classList.add("correct"); if(chosen!==correctBtn) chosen.classList.add("wrong");
+      const right = saidFact===f.fact;
+      fb.className="feedback show "+(right?"right":"miss");
+      fb.innerHTML=`<div class="verdict">${right?"\u2713 Correct":"\u2717 Look again"}</div><div>${f.exp}</div>`;
+      state.fmDone.add(i); tally(right); if(right) state.fmCorrect++;
+      addXP(right?8:3,right?"+8 XP":"+3 XP"); updateDash();
+    };
+    factB.onclick=()=>choose(true); mythB.onclick=()=>choose(false);
+    root.appendChild(card);
+  });
+}
+
+/* ---------------- RIGHTS MATCH ---------------- */
+let matchSel=null;
+function renderMatch(){
+  const L=$("#matchL"), R=$("#matchR"); L.innerHTML="<small>Amendment</small>"; R.innerHTML="<small>Protects</small>";
+  const rights=MATCH.map((m,i)=>({...m,i})).sort(()=>Math.random()-0.5);
+  MATCH.forEach((m,i)=>{
+    const a=document.createElement("div"); a.className="match-item"; a.textContent=m.amend; a.dataset.i=i; a.dataset.side="L";
+    a.onclick=()=>selectMatch(a); L.appendChild(a);
+  });
+  rights.forEach(m=>{
+    const b=document.createElement("div"); b.className="match-item"; b.textContent=m.right; b.dataset.i=m.i; b.dataset.side="R";
+    b.onclick=()=>selectMatch(b); R.appendChild(b);
+  });
+}
+function selectMatch(el){
+  if(el.classList.contains("matched")) return;
+  if(!matchSel){ matchSel=el; el.classList.add("selected"); return; }
+  if(matchSel===el){ el.classList.remove("selected"); matchSel=null; return; }
+  if(matchSel.dataset.side===el.dataset.side){ matchSel.classList.remove("selected"); matchSel=el; el.classList.add("selected"); return; }
+  // a pair from both sides
+  if(matchSel.dataset.i===el.dataset.i){
+    matchSel.classList.remove("selected"); matchSel.classList.add("matched"); el.classList.add("matched");
+    matchSel=null; state.matched++; tally(true); addXP(6,"+6 XP — match!"); updateDash();
+  } else {
+    const wrong=matchSel; matchSel.classList.remove("selected"); matchSel=null;
+    el.style.borderColor="var(--bad)"; wrong.style.borderColor="var(--bad)";
+    setTimeout(()=>{ el.style.borderColor=""; wrong.style.borderColor=""; },500);
+    tally(false); toast("Not a match — try again");
+  }
+}
+
+/* ---------------- TRIVIA ---------------- */
+function renderTrivia(){
+  const root=$("#trivia"); root.innerHTML="";
+  TRIVIA.forEach((t,i)=>{
+    const card=document.createElement("div"); card.className="card";
+    card.innerHTML=`<p class="scene">${t.q}</p><div class="opts"></div><div class="feedback"></div>`;
+    const opts=card.querySelector(".opts"), fb=card.querySelector(".feedback");
+    t.opts.forEach((o,oi)=>{
+      const b=document.createElement("button"); b.className="opt"; b.textContent=o;
+      b.onclick=()=>{
+        if(state.trivDone.has(i)) return;
+        [...opts.children].forEach((x,xi)=>{x.disabled=true; if(xi===t.a)x.classList.add("correct"); else if(xi===oi)x.classList.add("wrong");});
+        const right=oi===t.a;
+        fb.className="feedback show "+(right?"right":"miss");
+        fb.innerHTML=`<div class="verdict">${right?"\u2713 Correct":"\u2717 Not quite"}</div><div>${t.exp}</div>`;
+        state.trivDone.add(i); tally(right); if(right) state.trivCorrect++;
+        addXP(right?6:2,right?"+6 XP":"+2 XP"); updateDash();
+      };
+      opts.appendChild(b);
+    });
+    root.appendChild(card);
+  });
+}
+
+/* ---------------- PROGRESSION ---------------- */
+function tally(right){ state.totalAnswers++; if(right) state.rightAnswers++; }
+function addXP(amount,msg){
+  const before=level(state.xp); state.xp+=amount; const after=level(state.xp);
+  updateDash();
+  if(after>before) toast("\uD83C\uDF89 Level up! You're Level "+after);
+  else if(msg) toast(msg);
+  checkBadges();
+}
+function updateDash(){
+  const lv=level(state.xp), into=state.xp%XP_PER_LEVEL;
+  $("#xpfill").style.width=(into/XP_PER_LEVEL*100)+"%";
+  $("#xpNow").textContent=state.xp+" XP";
+  $("#xpNext").textContent=(XP_PER_LEVEL-into)+" XP to Level "+(lv+1);
+  $("#levelLabel").textContent="Level "+lv;
+  $("#st-lessons").textContent=state.doneLessons.size;
+  $("#st-scen").textContent=state.solvedScen.size;
+  $("#st-acc").textContent= state.totalAnswers? Math.round(state.rightAnswers/state.totalAnswers*100)+"%":"—";
+  $("#st-streak").textContent=state.streak;
+}
+function renderBadges(){
+  const root=$("#badges"); root.innerHTML="";
+  BADGES.forEach(bd=>{
+    const el=document.createElement("div"); el.className="badge"+(state.earned.has(bd.id)?" earned":""); el.id="badge-"+bd.id;
+    el.innerHTML=`<span class="ic">${bd.ic}</span>${bd.label}`; root.appendChild(el);
+  });
+}
+function checkBadges(){
+  BADGES.forEach(bd=>{
+    if(!state.earned.has(bd.id) && bd.check(state)){
+      state.earned.add(bd.id); const el=$("#badge-"+bd.id); if(el) el.classList.add("earned");
+      toast(bd.ic+" Badge unlocked: "+bd.label);
+    }
+  });
+}
+
+/* ---------------- STREAK ---------------- */
+$("#streakBtn").onclick=()=>{
+  const today=new Date().toDateString();
+  if(state.lastCheckin===today){ toast("Already checked in today"); return; }
+  state.streak++; state.lastCheckin=today;
+  $("#streakBtn").disabled=true; $("#streakBtn").textContent="\u2713 Checked in — see you tomorrow!";
+  addXP(10,"\uD83D\uDD25 Streak +1! (+10 XP)"); updateDash(); checkBadges();
+};
+
+/* ---------------- THEME / RESET ---------------- */
+$("#themeBtn").onclick=()=>{
+  const h=document.documentElement, dark=h.getAttribute("data-theme")==="dark";
+  h.setAttribute("data-theme",dark?"light":"dark"); $("#themeBtn").textContent=dark?"🌙":"☀️";
+};
+let toastTimer;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2400); }
+$("#resetBtn").onclick=()=>{
+  Object.assign(state,{xp:0,streak:0,lastCheckin:null,solvedScen:new Set(),solvedCase:new Set(),doneLessons:new Set(),fmCorrect:0,fmDone:new Set(),matched:0,trivCorrect:0,trivDone:new Set(),totalAnswers:0,rightAnswers:0,earned:new Set()});
+  $("#streakBtn").disabled=false; $("#streakBtn").textContent="🔥 Check in for today (+10 XP)";
+  boot(); toast("Progress reset");
+};
+
+/* ---------------- BOOT ---------------- */
+function boot(){ renderTabs(); renderPaths(); renderScenarios(); renderCases(); renderFactMyth(); renderMatch(); renderTrivia(); renderBadges(); updateDash(); }
+boot();
+
+/* ============================================================
+   WANT PROGRESS TO SAVE BETWEEN VISITS?
+   On GitHub Pages you can persist with localStorage. After each
+   addXP/answer, save a snapshot (convert Sets with [...set]) and
+   load it inside boot(). Left out here so previews stay reliable.
+   ============================================================ */
+
+</script>
+</body>
+</html>
